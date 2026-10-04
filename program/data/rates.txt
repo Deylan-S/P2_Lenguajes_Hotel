@@ -1,0 +1,8 @@
+1,80 -- verde entre semana adulto domingo a jueves, abril a octubre
+2,40 -- verde entre semana niño	domingo a jueves, abril a octubre
+3,100 -- verde fin de semana adulto	viernes y sábado, abril a octubre
+4,50 -- verde fin de semana niño viernes y sábado, abril a octubre
+5,110 -- alta entre semana adulto domingo a jueves, noviembre a marzo
+6,55 -- alta entre semana niño domingo a jueves, noviembre a marzo
+7,130 -- alta fin de semana adulto viernes y sábado, noviembre a marzo
+8,65 -- alta fin de semana niño	viernes y sábado, noviembre a marzo

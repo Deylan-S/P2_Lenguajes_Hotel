@@ -1,0 +1,2 @@
+Estandar,una habitación con cama queen y aire acondicionado,3
+Suite,una habitación con cama king y balcón,4
