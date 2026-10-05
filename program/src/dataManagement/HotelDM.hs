@@ -1,4 +1,4 @@
-module HotelData (getHotelInfo) where
+module HotelDM (getHotelInfo) where
 
 import Types (HotelInfo)
 
