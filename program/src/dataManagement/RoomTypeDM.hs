@@ -1,16 +1,10 @@
 module RoomTypeDM (getRoomTypes, addRoomType, getRtFromTxt) where
 
+
 import Control.Exception (evaluate)
 import Data.Maybe (mapMaybe)
 import Types (RoomType (..))
-
-splitOnChar :: Char -> String -> [String]
-splitOnChar delimiter str = foldr go [""] str
-  where
-    go c (x:xs)
-      | c == delimiter = "" : x : xs
-      | otherwise      = (c : x) : xs
-
+import Utils (splitOnChar)
 
 dataFile :: FilePath
 dataFile = "program/data/typesDB.txt"
