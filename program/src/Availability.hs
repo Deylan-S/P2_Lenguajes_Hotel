@@ -7,8 +7,8 @@ import Types
 -- Salidas: True si está Active o Invoiced, False si está Cancelled
 -- Restricciones: ninguna
 blocksRooms :: Reservation -> Bool
-blocksRooms r = 
-    if resStatus r /= Cancelled 
+blocksRooms r =
+    if resStatus r /= Cancelled
     then True
     else False
 
@@ -17,8 +17,8 @@ blocksRooms r =
 -- Salidas: True si la entrada <= fecha < salida (el día de la salida queda libre)
 -- Restricciones: ninguna
 coversDate :: Date -> Reservation -> Bool
-coversDate d r = 
-    if (resCheckIn r <= d) && (d < resCheckOut r) 
+coversDate d r =
+    if (resCheckIn r <= d) && (d < resCheckOut r)
     then True
     else False
 
@@ -27,8 +27,8 @@ coversDate d r =
 -- Salidas: True si coincide con al menos una noche con (entrada, salida)
 -- Restricciones: se asume que la entrada es antes que la salida
 overlapsRange :: Date -> Date -> Reservation -> Bool
-overlapsRange from to r = 
-    if (resCheckIn r < to) && (from < resCheckOut r) 
+overlapsRange from to r =
+    if (resCheckIn r < to) && (from < resCheckOut r)
     then True
     else False
 
@@ -54,7 +54,7 @@ availableRooms :: System -> Date -> [Room]
 availableRooms sys date = filter (\room -> if elem (roomId room) busy then False else True) (sysRooms sys)
   where
     busy = map (\pair -> fst pair) (bookedPairs sys (coversDate date))
- 
+
 -- Objetivo: listar las habitaciones ocupadas en un día y la reserva que las ocupa
 -- Entradas: el estado del sistema y la fecha a consultar
 -- Salidas: lista de datos (habitación, código de reserva)
@@ -64,7 +64,7 @@ occupiedRooms sys date = concatMap withReservation (sysRooms sys)
   where
     booked = bookedPairs sys (coversDate date)
     withReservation room = [ (room, rid) | (rmId, rid) <- booked, rmId == roomId room ]
- 
+
 -- Objetivo: listar las habitaciones libres durante todo un rango de noches
 -- Entradas: el sistema, la fecha de entrada y la fecha de salida
 -- Salidas: lista de habitaciones libres cada noche del rango
