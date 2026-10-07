@@ -17,3 +17,13 @@ addReservation newReservation = do
     reservations <- getReservations
     let updatedReservations = newReservation : reservations
     writeFile filePath (show updatedReservations)
+
+changeReservationStatus :: Int -> ReservationStatus -> IO ()
+changeReservationStatus resId newStatus = do
+    reservations <- getReservations
+    let updatedReservations = map updateStatus reservations
+    writeFile filePath (show updatedReservations)
+  where
+    updateStatus res
+      | resId res == resId = res { resStatus = newStatus }
+      | otherwise          = res
