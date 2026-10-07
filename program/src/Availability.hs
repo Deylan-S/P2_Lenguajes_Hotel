@@ -39,8 +39,8 @@ overlapsRange from to r =
 -- Restricciones: ignora las reservas canceladas
 bookedPairs :: System -> (Reservation -> Bool) -> [(Int, Int)]
 bookedPairs sys covers =
-    let reservasFiltradas = filter (\r -> if blocksRooms r && covers r then True else False) (sysReservations sys)
-    in concatMap pairsOf reservasFiltradas
+    let filteredReservations = filter (\r -> if blocksRooms r && covers r then True else False) (sysReservations sys)
+    in concatMap pairsOf filteredReservations
   where
     pairsOf r = map (\o -> (occRoomId o, resId r)) (resOccupancies r)
 
