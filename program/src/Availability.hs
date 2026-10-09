@@ -1,6 +1,8 @@
 module Availability (availableRooms, occupiedRooms, freeInRange) where
 
 import Types
+import ReservationDM (getReservations)
+import RoomDM (getRooms)
 
 -- Objetivo: saber si una reserva bloquea habitaciones o si el estado es Cancelled
 -- Entradas: una reserva
@@ -34,12 +36,12 @@ overlapsRange from to r =
 
 -- Objetivo: obtener los datos (id de habitación y id de reserva) de las
 --           reservas que bloquean habitaciones
--- Entradas: el sistema y una condición sobre reservas
+-- Entradas: una lista de reservas y una condición sobre reservas
 -- Salidas:  lista de datos (id de habitación y id de reserva)
 -- Restricciones: ignora las reservas canceladas
-bookedPairs :: System -> (Reservation -> Bool) -> [(Int, Int)]
-bookedPairs sys covers =
-    let filteredReservations = filter (\r -> if blocksRooms r && covers r then True else False) (sysReservations sys)
+bookedPairs :: [Reservation] -> (Reservation -> Bool) -> [(Int, Int)]
+bookedPairs reservations covers =
+    let filteredReservations = filter (\r -> if blocksRooms r && covers r then True else False) reservations
     in concatMap pairsOf filteredReservations
   where
     pairsOf r = map (\o -> (occRoomId o, resId r)) (resOccupancies r)
@@ -47,32 +49,41 @@ bookedPairs sys covers =
 -- funciones que se deben exportar
 
 -- Objetivo: listar las habitaciones libres en un día específico
--- Entradas: el estado del sistema y la fecha a consultar
+-- Entradas: la fecha a consultar
 -- Salidas: lista de habitaciones (Room) disponibles ese día
 -- Restricciones: si no se han generado habitaciones, devuelve una lista vacía
-availableRooms :: System -> Date -> [Room]
-availableRooms sys date = filter (\room -> if elem (roomId room) busy then False else True) (sysRooms sys)
-  where
-    busy = map (\pair -> fst pair) (bookedPairs sys (coversDate date))
+availableRooms :: Date -> IO [Room]
+availableRooms date = do
+    roomsByType <- getRooms
+    reservations <- getReservations
+    let rooms = concat roomsByType
+        busy = map fst (bookedPairs reservations (coversDate date))
+    pure (filter (\room -> roomId room `notElem` busy) rooms)
 
 -- Objetivo: listar las habitaciones ocupadas en un día y la reserva que las ocupa
--- Entradas: el estado del sistema y la fecha a consultar
+-- Entradas: la fecha a consultar
 -- Salidas: lista de datos (habitación, código de reserva)
 -- Restricciones: las reservas canceladas no cuentan, las facturadas sí
-occupiedRooms :: System -> Date -> [(Room, Int)]
-occupiedRooms sys date = concatMap withReservation (sysRooms sys)
-  where
-    booked = bookedPairs sys (coversDate date)
-    withReservation room = [ (room, rid) | (rmId, rid) <- booked, rmId == roomId room ]
+occupiedRooms :: Date -> IO [(Room, Int)]
+occupiedRooms date = do
+    roomsByType <- getRooms
+    reservations <- getReservations
+    let rooms = concat roomsByType
+        booked = bookedPairs reservations (coversDate date)
+        withReservation room = [ (room, rid) | (rmId, rid) <- booked, rmId == roomId room ]
+    pure (concatMap withReservation rooms)
 
 -- Objetivo: listar las habitaciones libres durante todo un rango de noches
--- Entradas: el sistema, la fecha de entrada y la fecha de salida
+-- Entradas: la fecha de entrada y la fecha de salida
 -- Salidas: lista de habitaciones libres cada noche del rango
 -- Restricciones: la entrada debe ser menor que la salida, sino devuelve una lista vacía
-freeInRange :: System -> Date -> Date -> [Room]
-freeInRange sys checkIn checkOut =
+freeInRange :: Date -> Date -> IO [Room]
+freeInRange checkIn checkOut =
     if checkOut <= checkIn
-    then []
-    else filter (\room -> if elem (roomId room) busy then False else True) (sysRooms sys)
-  where
-    busy = map (\pair -> fst pair) (bookedPairs sys (overlapsRange checkIn checkOut))
+    then pure []
+    else do
+        roomsByType <- getRooms
+        reservations <- getReservations
+        let rooms = concat roomsByType
+            busy = map fst (bookedPairs reservations (overlapsRange checkIn checkOut))
+        pure (filter (\room -> roomId room `notElem` busy) rooms)
