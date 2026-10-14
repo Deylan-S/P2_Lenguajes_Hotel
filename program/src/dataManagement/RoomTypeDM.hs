@@ -1,6 +1,5 @@
 module RoomTypeDM (getRoomTypes, addRoomType, getRtFromTxt) where
 
-
 import Control.Exception (evaluate)
 import Data.Maybe (mapMaybe)
 import Types (RoomType (..))
