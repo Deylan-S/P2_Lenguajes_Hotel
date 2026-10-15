@@ -1,0 +1,44 @@
+module RoomTypeDM (getRoomTypes, addRoomType, getRtFromTxt) where
+
+
+import Control.Exception (evaluate)
+import Data.Maybe (mapMaybe)
+import Text.Read (readMaybe)
+import Types (RoomType (..))
+import Utils (splitOnChar)
+
+dataFile :: FilePath
+dataFile = "program/data/typesDB.txt"
+
+getRoomTypes :: IO [RoomType]
+getRoomTypes = do
+    contents <- readFile dataFile
+    _ <- evaluate (length contents) -- evaluar la longitud para forzar que Haskell no sea perezoso.
+    pure (read contents)
+
+addRoomType :: RoomType -> IO ()
+addRoomType newRoomType = do
+    roomTypes <- getRoomTypes
+    if any ((== rtName newRoomType) . rtName) roomTypes
+        then putStrLn $ "El tipo de habitación " ++ rtName newRoomType ++ " ya existe. No se agregó."
+        else do
+            let updatedRoomTypes = newRoomType : roomTypes
+            writeFile dataFile (show updatedRoomTypes)
+            putStrLn $ "Tipo de habitación agregado: " ++ rtName newRoomType
+
+roomTypeListToType :: [String] -> Maybe RoomType
+roomTypeListToType [name, description, maxGuestsStr] =
+    RoomType name description <$> readMaybe maxGuestsStr
+roomTypeListToType _ = Nothing
+
+getRtFromTxt :: String -> IO [RoomType]
+getRtFromTxt path = do
+    contents <- readFile path
+    let lineList = lines contents
+    let parsedRoomTypes = map (splitOnChar ',') lineList
+    let roomTypes = mapMaybe roomTypeListToType parsedRoomTypes
+    pure roomTypes
+
+
+
+
