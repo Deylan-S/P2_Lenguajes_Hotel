@@ -1,6 +1,1 @@
-Hotel RIU
-3-101-123456
-www.hoteleRiu.com
-1111-2222
-Costa Rica
-Guanacaste
+HotelInfo {hotelName = "Hotel RIU", hotelId = "3-101-123456", hotelWebsite = "www.hoteleRiu.com", hotelPhone = "1111-2222", hotelCountry = "Costa Rica", hotelProvince = "Guanacaste"}
