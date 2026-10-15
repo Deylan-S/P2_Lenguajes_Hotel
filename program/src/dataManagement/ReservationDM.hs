@@ -1,6 +1,7 @@
 module ReservationDM (getReservations, addReservation, changeReservationStatus) where
+
 import Control.Exception (evaluate)
-import Types (Reservation (..), RoomOccupancy (..), ReservationStatus (..), DateTime (..), Date (..))
+import Types (Reservation (..), ReservationStatus (..))
 
 filePath :: FilePath
 filePath = "program/data/reservationsDB.txt"

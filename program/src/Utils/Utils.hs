@@ -6,6 +6,7 @@ splitOnChar :: Char -- ^ El carácter delimitador
             -> [String] -- ^ La lista de subcadenas resultante
 splitOnChar delimiter str = foldr go [""] str
   where
+    go _ [] = [""]
     go c (x:xs)
       | c == delimiter = "" : x : xs
       | otherwise      = (c : x) : xs

@@ -1,7 +1,9 @@
 module RoomTypeDM (getRoomTypes, addRoomType, getRtFromTxt) where
 
+
 import Control.Exception (evaluate)
 import Data.Maybe (mapMaybe)
+import Text.Read (readMaybe)
 import Types (RoomType (..))
 import Utils (splitOnChar)
 
@@ -18,15 +20,15 @@ addRoomType :: RoomType -> IO ()
 addRoomType newRoomType = do
     roomTypes <- getRoomTypes
     if any ((== rtName newRoomType) . rtName) roomTypes
-        then print $ "El tipo de habitación " ++ rtName newRoomType ++ " ya existe. No se agregó."
+        then putStrLn $ "El tipo de habitación " ++ rtName newRoomType ++ " ya existe. No se agregó."
         else do
             let updatedRoomTypes = newRoomType : roomTypes
             writeFile dataFile (show updatedRoomTypes)
-            print $ "Tipo de habitación agregado: " ++ rtName newRoomType
+            putStrLn $ "Tipo de habitación agregado: " ++ rtName newRoomType
 
 roomTypeListToType :: [String] -> Maybe RoomType
 roomTypeListToType [name, description, maxGuestsStr] =
-    Just (RoomType name description (read maxGuestsStr))
+    RoomType name description <$> readMaybe maxGuestsStr
 roomTypeListToType _ = Nothing
 
 getRtFromTxt :: String -> IO [RoomType]

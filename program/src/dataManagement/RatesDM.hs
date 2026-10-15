@@ -3,6 +3,10 @@ module RatesDM where
 import Types (Rate (..))
 import Control.Exception (evaluate)
 import System.Directory (doesFileExist)
+import Data.Char (isSpace)
+import Data.Maybe (mapMaybe)
+import Text.Read (readMaybe)
+import Utils (splitOnChar)
 
 dataFile :: FilePath
 dataFile = "program/data/ratesDB.txt"
@@ -21,10 +25,20 @@ getRatesFromTxt path = do
             pure []
         else do
             contents <- readFile path
-            let lineList = lines contents
-            let lineCount = length lineList
-            let rates = [Rate i (read (lineList !! (i - 1))) | i <- [1..(lineCount)]]
-            pure rates
+            _ <- evaluate (length contents)
+            let dataLines = filter (not . all isSpace) (lines contents)
+            pure (mapMaybe parseRateLine (zip [1 ..] dataLines))
+
+-- Objetivo: convertir una linea del archivo en una tarifa
+-- Entradas: posicion de la linea (1 en adelante) y el texto de la linea
+-- Salidas: Just tarifa si el formato es valido, Nothing en caso contrario
+-- Restricciones: formatos aceptados "monto" o "id,monto"
+parseRateLine :: (Int, String) -> Maybe Rate
+parseRateLine (position, line) =
+    case splitOnChar ',' (filter (/= '\r') line) of
+        [amountText]         -> Rate position <$> readMaybe amountText
+        [idText, amountText] -> Rate <$> readMaybe idText <*> readMaybe amountText
+        _                    -> Nothing
 
 loadRates :: [Rate] -> IO ()
 loadRates newRates = do
